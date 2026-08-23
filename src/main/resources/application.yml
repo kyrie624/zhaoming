@@ -1,0 +1,10 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: zhaoming
+  profiles:
+    active: dev
+
+# 数据库、redis 等配置后续按需添加
