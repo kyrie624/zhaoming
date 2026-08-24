@@ -1,0 +1,16 @@
+# 服务器生产环境配置
+# 数据库连接通过环境变量注入，部署时无需改动代码：
+#   MYSQL_HOST / MYSQL_PORT / MYSQL_DB / MYSQL_USERNAME / MYSQL_PASSWORD
+# 启动方式：
+#   java -jar zhaoming.jar --spring.profiles.active=prod
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:zhaoming}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:zhaoming}
+    # 密码默认留空：未设置 MYSQL_PASSWORD 时启动会直接报错，避免误连默认库
+    password: ${MYSQL_PASSWORD:}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 50
+      connection-timeout: 30000

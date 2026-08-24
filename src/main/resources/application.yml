@@ -7,4 +7,17 @@ spring:
   profiles:
     active: dev
 
-# 数据库、redis 等配置后续按需添加
+# MyBatis-Plus 通用配置（与运行环境无关）
+mybatis-plus:
+  # Mapper XML 位置，默认 classpath:mapper/**/*.xml
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    # 数据库下划线字段自动映射到 Java 驼峰属性
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      # 主键自增（MySQL）
+      id-type: auto
+
+# 数据库、redis 等环境相关配置见 application-{profile}.yml
