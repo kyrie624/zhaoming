@@ -1,11 +1,24 @@
 server:
   port: 8090
 
+# 外部电表接口。地址留空时定时任务不会发起请求，接入真实接口时只需配置该项。
+meter:
+  external:
+    # 业务接口地址，不在 URL 中固定 deviceId
+    url: ${METER_EXTERNAL_URL:}
+    # 外部接口要求每个 deviceId 单独请求，多个编号用英文逗号分隔
+    device-ids: ${METER_EXTERNAL_DEVICE_IDS:}
+    connect-timeout-ms: ${METER_EXTERNAL_CONNECT_TIMEOUT_MS:5000}
+    read-timeout-ms: ${METER_EXTERNAL_READ_TIMEOUT_MS:10000}
+  collection:
+    fixed-rate-ms: ${METER_COLLECTION_FIXED_RATE_MS:60000}
+    initial-delay-ms: ${METER_COLLECTION_INITIAL_DELAY_MS:0}
+
 spring:
   application:
     name: zhaoming
   profiles:
-    active: dev
+    active: prod
 
 # MyBatis-Plus 通用配置（与运行环境无关）
 mybatis-plus:

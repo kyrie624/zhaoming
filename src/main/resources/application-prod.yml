@@ -3,11 +3,18 @@
 #   MYSQL_HOST / MYSQL_PORT / MYSQL_DB / MYSQL_USERNAME / MYSQL_PASSWORD
 # 启动方式：
 #   java -jar zhaoming.jar --spring.profiles.active=prod
+meter:
+  external:
+    # 外部设备数据接口；可通过 METER_EXTERNAL_URL 覆盖
+    url: ${METER_EXTERNAL_URL:http://190.2.147.3:3000/openapi/v1.0/device/list}
+    # 每个 deviceId 单独请求；可通过 METER_EXTERNAL_DEVICE_IDS 覆盖
+    device-ids: ${METER_EXTERNAL_DEVICE_IDS:d4,d14,d57,d68,d81,d88,d150,d157,d168,d172}
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:zhaoming}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: ${MYSQL_USERNAME:zhaoming}
+    username: ${MYSQL_USERNAME:root}
     # 密码默认留空：未设置 MYSQL_PASSWORD 时启动会直接报错，避免误连默认库
     password: ${MYSQL_PASSWORD:}
     hikari:
