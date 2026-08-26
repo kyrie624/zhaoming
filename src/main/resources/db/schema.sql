@@ -1,3 +1,10 @@
+-- 初始化数据库。执行该脚本的 MySQL 账号需要具备 CREATE DATABASE 权限。
+CREATE DATABASE IF NOT EXISTS zhaoming
+    DEFAULT CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE zhaoming;
+
 -- 设备每分钟采样明细。执行一次即可；生产环境建议由 DBA 纳入正式迁移流程。
 CREATE TABLE IF NOT EXISTS device_measurement (
     id BIGINT NOT NULL AUTO_INCREMENT,
