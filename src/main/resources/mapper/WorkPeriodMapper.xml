@@ -53,4 +53,16 @@
         </if>
         ORDER BY start_at ASC
     </select>
+
+    <select id="findOverlappingForDevices" resultMap="WorkPeriodMap">
+        SELECT id, device_id, device_name, floor_name, start_at, end_at
+        FROM device_work_period
+        WHERE device_id IN
+        <foreach collection="deviceIds" item="deviceId" open="(" separator="," close=")">
+            #{deviceId}
+        </foreach>
+          AND start_at &lt; #{endAt}
+          AND (end_at IS NULL OR end_at &gt; #{startAt})
+        ORDER BY device_id, start_at ASC
+    </select>
 </mapper>

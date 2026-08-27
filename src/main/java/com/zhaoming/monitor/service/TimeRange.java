@@ -17,13 +17,20 @@ public final class TimeRange {
         this.end = end;
     }
 
+    public static TimeRange of(LocalDateTime start, LocalDateTime end) {
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("开始时间和结束时间不能为空");
+        }
+        if (end.isBefore(start)) {
+            throw new IllegalArgumentException("结束时间不能早于开始时间");
+        }
+        return new TimeRange(start, end);
+    }
+
     public static TimeRange parse(String start, String end) {
         LocalDateTime startTime = parseTime(start);
         LocalDateTime endTime = parseTime(end);
-        if (endTime.isBefore(startTime)) {
-            throw new IllegalArgumentException("结束时间不能早于开始时间");
-        }
-        return new TimeRange(startTime, endTime);
+        return of(startTime, endTime);
     }
 
     private static LocalDateTime parseTime(String value) {

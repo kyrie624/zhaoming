@@ -1,5 +1,6 @@
 package com.zhaoming.monitor.controller;
 
+import com.zhaoming.monitor.service.AnnualMonthlyStatisticsService;
 import com.zhaoming.monitor.service.EnergyService;
 import com.zhaoming.monitor.service.TimeRange;
 import com.zhaoming.monitor.service.WorkPeriodService;
@@ -18,10 +19,13 @@ import java.util.List;
 public class DeviceMonitorController {
     private final EnergyService energyService;
     private final WorkPeriodService workPeriodService;
+    private final AnnualMonthlyStatisticsService annualMonthlyStatisticsService;
 
-    public DeviceMonitorController(EnergyService energyService, WorkPeriodService workPeriodService) {
+    public DeviceMonitorController(EnergyService energyService, WorkPeriodService workPeriodService,
+                                   AnnualMonthlyStatisticsService annualMonthlyStatisticsService) {
         this.energyService = energyService;
         this.workPeriodService = workPeriodService;
+        this.annualMonthlyStatisticsService = annualMonthlyStatisticsService;
     }
 
     @GetMapping("/{deviceId}/work-periods")
@@ -56,6 +60,18 @@ public class DeviceMonitorController {
             @RequestParam String startTime,
             @RequestParam String endTime) {
         return energyService.calculateByFilter(deviceName, floorName, parseRange(startTime, endTime));
+    }
+
+    @GetMapping("/monthly-statistics")
+    public AnnualMonthlyStatisticsService.AnnualStatistics monthlyStatistics(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String deviceName,
+            @RequestParam(required = false) String floorName) {
+        try {
+            return annualMonthlyStatisticsService.calculate(year, deviceName, floorName);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     private TimeRange parseRange(String startTime, String endTime) {

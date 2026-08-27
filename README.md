@@ -43,11 +43,14 @@ set METER_EXTERNAL_DEVICE_IDS=d14,d15,d16
 ```text
 GET /api/devices/energy?deviceName=转运站&floorName=混匀区&startTime=2026-08-25T00:00:00&endTime=2026-08-26T00:00:00
 GET /api/devices/work-periods?deviceName=转运站&floorName=混匀区&startTime=2026-08-25T00:00:00&endTime=2026-08-26T00:00:00
+GET /api/devices/monthly-statistics?year=2026&deviceName=转运站&floorName=混匀区
 ```
 
 `deviceName` 为电表名称，支持模糊匹配；`floorName` 为区域，支持精确匹配。IP、设备状态和时间粒度不作为接口筛选条件，快捷时间由前端转换成 `startTime`、`endTime`。
 
 能源列表接口每行返回 `deviceName`、`floorName`、`differenceKwh`（当前时间范围总能耗）、`totalOnlineSeconds` 和 `totalOnlineDuration`（格式 `HH:mm:ss`，当前时间范围总在线时长）。
-```
+
+按月看板接口的 `year` 可选，默认为上海时区当年。当年只返回 1 月至当月的用电量和运行时长，历史年份返回完整 12 个月，未来年份不返回月份。缺少边界采样的月份 `hasData=false`、指标为 `null`。`totalDifferenceKwh`、`totalOnlineSeconds` 和 `totalOnlineDuration` 是已有数据月份的年度累计。
+看板查询会批量读取全部设备的月度电量边界和工作区间，再在服务内按月汇总，不会随“设备数 × 月份数”增加 SQL 往返次数。
 
 电能接口返回 `differenceKwh = endEnergyKwh - startEnergyKwh`。边界优先使用边界时刻之前（含边界）的最近采样；若边界前没有数据，则使用边界之后的第一条采样，并返回实际使用的采样时刻。

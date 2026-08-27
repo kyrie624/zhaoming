@@ -23,4 +23,8 @@ public interface WorkPeriodMapper {
                                                    @Param("floorName") String floorName,
                                                    @Param("startAt") LocalDateTime startAt,
                                                    @Param("endAt") LocalDateTime endAt);
+
+    List<WorkPeriodRecord> findOverlappingForDevices(@Param("deviceIds") List<String> deviceIds,
+                                                     @Param("startAt") LocalDateTime startAt,
+                                                     @Param("endAt") LocalDateTime endAt);
 }

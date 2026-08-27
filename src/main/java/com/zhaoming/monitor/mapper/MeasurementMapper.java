@@ -2,6 +2,7 @@ package com.zhaoming.monitor.mapper;
 
 import com.zhaoming.monitor.model.MeasurementRecord;
 import com.zhaoming.monitor.model.DeviceRecord;
+import com.zhaoming.monitor.model.EnergyBoundaryRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,4 +21,8 @@ public interface MeasurementMapper {
 
     List<DeviceRecord> findDevices(@Param("deviceName") String deviceName,
                                    @Param("floorName") String floorName);
+
+    List<EnergyBoundaryRecord> findEnergyBoundaries(
+            @Param("deviceIds") List<String> deviceIds,
+            @Param("boundaries") List<EnergyBoundaryRecord> boundaries);
 }

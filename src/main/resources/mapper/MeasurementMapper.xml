@@ -16,6 +16,14 @@
         <result property="floorName" column="floor_name"/>
     </resultMap>
 
+    <resultMap id="EnergyBoundaryMap" type="com.zhaoming.monitor.model.EnergyBoundaryRecord">
+        <result property="boundaryKey" column="boundary_key"/>
+        <result property="boundaryAt" column="boundary_at"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="collectedAt" column="collected_at"/>
+        <result property="energyKwh" column="energy_kwh"/>
+    </resultMap>
+
     <insert id="upsert" parameterType="com.zhaoming.monitor.model.MeasurementRecord">
         INSERT INTO device_measurement
             (device_id, device_name, floor_name, collected_at, energy_kwh, current_a, current_b, current_c, working)
@@ -48,16 +56,72 @@
     </select>
 
     <select id="findDevices" resultMap="DeviceMap">
-        SELECT device_id, MAX(device_name) AS device_name, MAX(floor_name) AS floor_name
-        FROM device_measurement
+        SELECT latest.device_id, latest.device_name, latest.floor_name
+        FROM (
+            SELECT device_id
+            FROM device_measurement
+            GROUP BY device_id
+        ) devices
+        JOIN device_measurement latest
+          ON latest.id = (
+              SELECT latest_sample.id
+              FROM device_measurement latest_sample
+              WHERE latest_sample.device_id = devices.device_id
+              ORDER BY latest_sample.collected_at DESC
+              LIMIT 1
+          )
         WHERE 1 = 1
         <if test="deviceName != null and deviceName != ''">
-            AND device_name LIKE CONCAT('%', #{deviceName}, '%')
+            AND latest.device_name LIKE CONCAT('%', #{deviceName}, '%')
         </if>
         <if test="floorName != null and floorName != ''">
-            AND floor_name = #{floorName}
+            AND latest.floor_name = #{floorName}
         </if>
-        GROUP BY device_id
-        ORDER BY device_id
+        ORDER BY latest.device_id
+    </select>
+
+    <!--
+        一次查出所有设备在各月边界的累计电量。边界优先使用之前（含）
+        的最近采样，没有时才使用之后的第一条，与单设备电能接口口径一致。
+    -->
+    <select id="findEnergyBoundaries" resultMap="EnergyBoundaryMap">
+        SELECT d.device_id,
+               boundary_points.boundary_key,
+               boundary_points.boundary_at,
+               sample.collected_at,
+               sample.energy_kwh
+        FROM (
+            <foreach collection="deviceIds" item="deviceId" separator=" UNION ALL ">
+                SELECT #{deviceId} AS device_id
+            </foreach>
+        ) d
+        CROSS JOIN (
+            <foreach collection="boundaries" item="boundary" separator=" UNION ALL ">
+                SELECT #{boundary.boundaryKey} AS boundary_key,
+                       CAST(#{boundary.boundaryAt} AS DATETIME) AS boundary_at
+            </foreach>
+        ) boundary_points
+        LEFT JOIN device_measurement sample
+          ON sample.id = COALESCE(
+              (
+                  SELECT before_sample.id
+                  FROM device_measurement before_sample
+                  WHERE before_sample.device_id = d.device_id
+                    AND before_sample.collected_at &lt;= boundary_points.boundary_at
+                    AND before_sample.energy_kwh IS NOT NULL
+                  ORDER BY before_sample.collected_at DESC
+                  LIMIT 1
+              ),
+              (
+                  SELECT after_sample.id
+                  FROM device_measurement after_sample
+                  WHERE after_sample.device_id = d.device_id
+                    AND after_sample.collected_at &gt;= boundary_points.boundary_at
+                    AND after_sample.energy_kwh IS NOT NULL
+                  ORDER BY after_sample.collected_at ASC
+                  LIMIT 1
+              )
+          )
+        ORDER BY d.device_id, boundary_points.boundary_at
     </select>
 </mapper>
