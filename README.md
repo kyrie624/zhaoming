@@ -2,6 +2,8 @@
 
 应用每分钟直接请求 `meter.external.url`，暂不调用登录接口，也不添加鉴权请求头。应用解析附件格式的 `data.list[].properties[]`：
 
+后端默认允许本地前端来源 `http://localhost:8889` 和 `http://127.0.0.1:8889`。正式部署时可通过 `CORS_ALLOWED_ORIGINS` 配置前端地址，多个地址用英文逗号分隔。
+
 生产环境默认设备接口为：
 
 ```text
